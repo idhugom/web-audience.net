@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+---
+<BaseLayout title="Page introuvable" description="Cette page n'existe pas." noindex={true}>
+  <section class="nf grid-bg">
+    <div class="container container-narrow nf-inner">
+      <p class="nf-code">404</p>
+      <h1 class="nf-title">Cette page s'est perdue sur le web.</h1>
+      <p class="nf-sub">Le lien est peut-être cassé ou la page a été déplacée. Reprenons la navigation.</p>
+      <div class="nf-actions">
+        <a href="/" class="btn btn-primary"><Icon name="arrow" size={18} class="flip" /> Retour à l'accueil</a>
+        <a href="/recherche" class="btn btn-ghost"><Icon name="search" size={18} /> Rechercher</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .nf { min-height: 72vh; display: grid; place-items: center; text-align: center; }
+  .nf-inner { padding-block: 60px; }
+  .nf-code { font-family: var(--font-display); font-weight: 700; font-size: clamp(4rem, 16vw, 9rem); line-height: 1; margin: 0; background: var(--gradient-brand); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: -0.04em; }
+  .nf-title { font-size: clamp(1.5rem, 4vw, 2.3rem); margin: 10px 0 12px; }
+  .nf-sub { color: var(--slate-600); font-size: 1.08rem; margin: 0 0 28px; }
+  .nf-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .nf-actions :global(.flip) { transform: rotate(180deg); }
+</style>

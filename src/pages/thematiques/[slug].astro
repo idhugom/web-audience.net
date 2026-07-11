@@ -1,0 +1,105 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Icon from '../../components/Icon.astro';
+import { SITE } from '../../data/site';
+import { CATEGORIES, categoryFor } from '../../data/categories';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('blog')).filter((p) => !p.data.draft);
+  return CATEGORIES.map((c) => {
+    const posts = all
+      .filter((p) => p.data.categorySlug === c.slug)
+      .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+    return { params: { slug: c.slug }, props: { category: c, posts } };
+  });
+}
+
+const { category, posts } = Astro.props;
+const cat = categoryFor(category.slug);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${category.name} — ${SITE.name}`,
+  description: category.tagline,
+  url: new URL(`/thematiques/${category.slug}`, SITE.url).href,
+};
+---
+<BaseLayout
+  title={category.name}
+  description={`${category.tagline} Retrouvez tous nos articles ${category.name.toLowerCase()} sur web-audience.`}
+  jsonld={jsonld}
+>
+  <section class="cat-hero grid-bg">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Fil d'Ariane">
+        <a href="/">Accueil</a><Icon name="chevron" size={12} />
+        <a href="/thematiques">Thématiques</a>
+      </nav>
+      <div class="cat-hero-inner">
+        <span class="cat-hero-icon"><Icon name={cat.icon} size={30} /></span>
+        <div>
+          <h1 class="cat-title">{category.name}</h1>
+          <p class="cat-tag">{category.tagline}</p>
+          <p class="meta cat-count">{posts.length} article{posts.length > 1 ? 's' : ''}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {posts.length > 0 ? (
+        <div class="grid grid-3">
+          {posts.map((p, i) => (
+            <ArticleCard
+              eager={i < 3}
+              title={p.data.title}
+              href={`/blog/${p.id}`}
+              description={p.data.description}
+              cover={p.data.cover}
+              coverAlt={p.data.coverAlt}
+              categorySlug={p.data.categorySlug}
+              date={p.data.pubDate}
+              readingTime={p.data.readingTime}
+            />
+          ))}
+        </div>
+      ) : (
+        <div class="empty">
+          <p>Les articles de cette thématique arrivent très bientôt.</p>
+          <a href="/blog" class="btn btn-ghost">Voir tous les articles</a>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="other-cats">
+    <div class="container">
+      <p class="eyebrow">Continuer l'exploration</p>
+      <div class="chip-row">
+        {CATEGORIES.filter((c) => c.slug !== category.slug).map((c) => (
+          <a href={`/thematiques/${c.slug}`} class="chip"><Icon name={c.icon} size={14} /> {c.name}</a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cat-hero { border-bottom: 1px solid var(--border); background-color: var(--bg-soft); padding-block: 34px 34px; }
+  .breadcrumb { display: flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--slate-500); margin-bottom: 20px; }
+  .breadcrumb a { color: var(--slate-500); font-weight: 500; }
+  .breadcrumb a:hover { color: var(--blue-700); }
+  .cat-hero-inner { display: flex; align-items: center; gap: 20px; }
+  .cat-hero-icon { display: grid; place-items: center; flex: none; width: 68px; height: 68px; border-radius: 18px; background: var(--gradient-brand); color: #fff; box-shadow: var(--glow); }
+  .cat-title { font-size: clamp(1.8rem, 4.4vw, 2.7rem); margin: 0 0 6px; }
+  .cat-tag { color: var(--slate-600); font-size: 1.08rem; margin: 0 0 8px; }
+  .cat-count { margin: 0; }
+  .empty { text-align: center; padding: 60px 0; display: flex; flex-direction: column; align-items: center; gap: 18px; color: var(--slate-500); }
+  .other-cats { padding-block: 20px 70px; }
+  .chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; font-size: 0.86rem; font-weight: 500; color: var(--slate-600); background: #fff; border: 1px solid var(--border); border-radius: var(--r-full); padding: 7px 14px; transition: all 0.15s; }
+  .chip:hover { border-color: var(--blue-300); color: var(--blue-700); text-decoration: none; }
+</style>

@@ -1,0 +1,51 @@
+---
+import type { Page } from 'astro';
+import Icon from './Icon.astro';
+interface Props { page: Page<any>; }
+const { page } = Astro.props;
+if (page.lastPage <= 1) { /* no pagination */ }
+
+// Build a compact page list with ellipses
+const cur = page.currentPage;
+const last = page.lastPage;
+const nums: (number | '…')[] = [];
+for (let i = 1; i <= last; i++) {
+  if (i === 1 || i === last || Math.abs(i - cur) <= 1) nums.push(i);
+  else if (nums[nums.length - 1] !== '…') nums.push('…');
+}
+const base = page.url.first?.replace(/\/1?$/, '') || '/blog';
+const hrefFor = (n: number) => (n === 1 ? base : `${base}/${n}`);
+---
+{last > 1 && (
+  <nav class="pagination" aria-label="Pagination">
+    {page.url.prev ? (
+      <a href={page.url.prev} class="pg-arrow" rel="prev"><Icon name="chevron" size={16} class="flip" /> Précédent</a>
+    ) : (
+      <span class="pg-arrow disabled"><Icon name="chevron" size={16} class="flip" /> Précédent</span>
+    )}
+    <div class="pg-nums">
+      {nums.map((n) => n === '…'
+        ? <span class="pg-ellipsis">…</span>
+        : <a href={hrefFor(n)} class:list={['pg-num', { active: n === cur }]} aria-current={n === cur ? 'page' : undefined}>{n}</a>
+      )}
+    </div>
+    {page.url.next ? (
+      <a href={page.url.next} class="pg-arrow" rel="next">Suivant <Icon name="chevron" size={16} /></a>
+    ) : (
+      <span class="pg-arrow disabled">Suivant <Icon name="chevron" size={16} /></span>
+    )}
+  </nav>
+)}
+
+<style>
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 52px; flex-wrap: wrap; }
+  .pg-arrow { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.9rem; color: var(--blue-700); padding: 8px 14px; border-radius: var(--r-full); border: 1px solid var(--border); background: #fff; }
+  .pg-arrow:hover { border-color: var(--blue-300); text-decoration: none; }
+  .pg-arrow.disabled { color: var(--slate-300); pointer-events: none; }
+  .pg-arrow :global(.flip) { transform: rotate(180deg); }
+  .pg-nums { display: flex; gap: 6px; }
+  .pg-num { display: grid; place-items: center; min-width: 40px; height: 40px; padding: 0 6px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; color: var(--slate-600); border: 1px solid transparent; }
+  .pg-num:hover { background: var(--blue-50); color: var(--blue-700); text-decoration: none; }
+  .pg-num.active { background: var(--gradient-brand); color: #fff; }
+  .pg-ellipsis { color: var(--slate-400); padding: 0 4px; align-self: center; }
+</style>

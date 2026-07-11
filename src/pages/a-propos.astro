@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../data/site';
+const values = [
+  { icon: 'globe', title: 'Le web, sans jargon', text: "On traduit le numérique en langage clair : chaque article part d'une vraie question et y répond de A à Z." },
+  { icon: 'check', title: 'Vérifié et actionnable', text: "Des contenus complets, structurés et pensés pour passer à l'action, pas pour remplir la page." },
+  { icon: 'layers', title: 'Large et transversal', text: "Tech, argent, maison, santé, voyage… parce que la vie connectée touche à tout." },
+  { icon: 'bolt', title: 'Rapide et lisible', text: 'Un site léger, accessible et agréable, sur mobile comme sur ordinateur.' },
+];
+---
+<BaseLayout title="À propos" description={`Découvrez la mission de ${SITE.name} : rendre le web compréhensible et actionnable pour tous.`}>
+  <section class="about-hero grid-bg">
+    <div class="container container-narrow">
+      <p class="eyebrow">Notre mission</p>
+      <h1 class="about-title">Rendre le web <span class="grad">clair et utile</span> pour tout le monde.</h1>
+      <p class="about-lede">
+        {SITE.name} est un média indépendant qui décrypte le numérique et la vie connectée.
+        Notre conviction : bien informé, on décide mieux — que l'on cherche à comprendre une
+        démarche, comparer deux options ou simplement satisfaire sa curiosité.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-2 values">
+        {values.map((v) => (
+          <div class="value-card">
+            <span class="value-icon"><Icon name={v.icon} size={22} /></span>
+            <h2 class="value-title">{v.title}</h2>
+            <p class="value-text">{v.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="about-cta">
+    <div class="container container-narrow cta-inner grid-bg">
+      <h2 class="cta-h">Une idée d'article, une question, un partenariat ?</h2>
+      <p class="cta-p">Écrivez-nous, nous lisons tout.</p>
+      <a href={`mailto:${SITE.email}`} class="btn btn-primary"><Icon name="mail" size={18} /> {SITE.email}</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-hero { padding-block: 60px 40px; border-bottom: 1px solid var(--border); background-color: var(--bg-soft); }
+  .about-title { font-size: clamp(2rem, 5.4vw, 3.3rem); margin: 16px 0 20px; line-height: 1.08; }
+  .grad { background: var(--gradient-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .about-lede { font-size: 1.2rem; color: var(--slate-600); line-height: 1.7; margin: 0; }
+  .values { gap: 22px; }
+  .value-card { background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg); padding: 28px; transition: all 0.2s; }
+  .value-card:hover { border-color: var(--blue-200); box-shadow: var(--shadow-md); }
+  .value-icon { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 13px; background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-100); margin-bottom: 16px; }
+  .value-title { font-size: 1.25rem; margin: 0 0 8px; }
+  .value-text { color: var(--slate-600); margin: 0; line-height: 1.6; }
+  .about-cta { padding-block: 20px 80px; }
+  .cta-inner { text-align: center; background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 54px 30px; }
+  .cta-h { font-size: clamp(1.4rem, 3.4vw, 2rem); margin: 0 0 10px; }
+  .cta-p { color: var(--slate-600); margin: 0 0 24px; }
+</style>

@@ -1,0 +1,72 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Pagination from '../../components/Pagination.astro';
+import Icon from '../../components/Icon.astro';
+import { CATEGORIES } from '../../data/categories';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = (await getCollection('blog'))
+    .filter((p) => !p.data.draft)
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return paginate(posts, { pageSize: 18 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
+---
+<BaseLayout
+  title="Tous les articles"
+  description="Parcourez tous les guides et articles de web-audience : tech, finance, maison, cuisine, voyage, santé et bien plus."
+>
+  <section class="listing-hero grid-bg">
+    <div class="container">
+      <p class="eyebrow">La bibliothèque</p>
+      <h1 class="listing-title">Tous les articles</h1>
+      <p class="listing-sub">Des guides complets et vérifiés, classés par thématique. Page {page.currentPage} sur {page.lastPage}.</p>
+      <div class="chip-row">
+        <a href="/blog" class="chip is-active">Tout</a>
+        {CATEGORIES.map((c) => (
+          <a href={`/thematiques/${c.slug}`} class="chip"><Icon name={c.icon} size={14} /> {c.name}</a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid-3">
+        {page.data.map((p, i) => (
+          <ArticleCard
+            eager={i < 3}
+            title={p.data.title}
+            href={`/blog/${p.id}`}
+            description={p.data.description}
+            cover={p.data.cover}
+            coverAlt={p.data.coverAlt}
+            categorySlug={p.data.categorySlug}
+            date={p.data.pubDate}
+            readingTime={p.data.readingTime}
+          />
+        ))}
+      </div>
+      <Pagination page={page} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .listing-hero { border-bottom: 1px solid var(--border); background-color: var(--bg-soft); padding-block: 44px 30px; }
+  .listing-title { font-size: clamp(2rem, 5vw, 3rem); margin: 14px 0 10px; }
+  .listing-sub { color: var(--slate-600); font-size: 1.08rem; margin: 0 0 24px; }
+  .chip-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.86rem; font-weight: 500; color: var(--slate-600);
+    background: #fff; border: 1px solid var(--border); border-radius: var(--r-full);
+    padding: 7px 14px; transition: all 0.15s;
+  }
+  .chip:hover { border-color: var(--blue-300); color: var(--blue-700); text-decoration: none; }
+  .chip.is-active { background: var(--gradient-brand); color: #fff; border-color: transparent; }
+</style>

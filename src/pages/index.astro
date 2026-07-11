@@ -1,0 +1,229 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import Icon from '../components/Icon.astro';
+import { SITE } from '../data/site';
+import { CATEGORIES } from '../data/categories';
+
+const all = (await getCollection('blog'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const featured = all[0];
+const secondary = all.slice(1, 5);
+const latest = all.slice(5, 11);
+
+// count articles per category for the grid
+const counts = new Map<string, number>();
+for (const p of all) counts.set(p.data.categorySlug, (counts.get(p.data.categorySlug) ?? 0) + 1);
+const activeCats = CATEGORIES.filter((c) => (counts.get(c.slug) ?? 0) > 0);
+const catsToShow = (activeCats.length ? activeCats : CATEGORIES).slice(0, 12);
+
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  inLanguage: 'fr-FR',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: `${SITE.url}/recherche?q={search_term_string}`,
+    'query-input': 'required name=search_term_string',
+  },
+};
+---
+<BaseLayout title={SITE.title} description={SITE.description} jsonld={jsonld}>
+  <!-- HERO -->
+  <section class="hero grid-bg">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container hero-inner">
+      <p class="eyebrow">Le web, décrypté</p>
+      <h1 class="hero-title">
+        Comprendre le web,<br />
+        <span class="grad">agir en ligne</span> en confiance.
+      </h1>
+      <p class="hero-sub">
+        {SITE.name} explore le numérique et la vie connectée : guides complets,
+        comparatifs et réponses claires pour naviguer, choisir et décider —
+        sur tous les sujets qui font votre quotidien en ligne.
+      </p>
+      <div class="hero-actions">
+        <a href="/blog" class="btn btn-primary">Explorer les articles <Icon name="arrow" size={18} /></a>
+        <a href="/thematiques" class="btn btn-ghost">Parcourir les thématiques</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">{all.length}+</span><span class="stat-label">articles</span></div>
+        <div class="stat"><span class="stat-num">{catsToShow.length}</span><span class="stat-label">thématiques</span></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">en français</span></div>
+      </div>
+    </div>
+  </section>
+
+  {featured && (
+    <section class="section featured-section">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">À la une</p>
+          <a href="/blog" class="see-all">Tous les articles <Icon name="arrow" size={16} /></a>
+        </div>
+        <div class="grid grid-3 feat-grid">
+          <ArticleCard
+            featured
+            eager
+            title={featured.data.title}
+            href={`/blog/${featured.id}`}
+            description={featured.data.description}
+            cover={featured.data.cover}
+            coverAlt={featured.data.coverAlt}
+            categorySlug={featured.data.categorySlug}
+            date={featured.data.pubDate}
+            readingTime={featured.data.readingTime}
+          />
+          {secondary.map((p) => (
+            <ArticleCard
+              title={p.data.title}
+              href={`/blog/${p.id}`}
+              description={p.data.description}
+              cover={p.data.cover}
+              coverAlt={p.data.coverAlt}
+              categorySlug={p.data.categorySlug}
+              date={p.data.pubDate}
+              readingTime={p.data.readingTime}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CATEGORIES -->
+  <section class="section cats-section dot-bg">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Explorer par thème</p>
+          <h2 class="section-title">Toutes les thématiques</h2>
+        </div>
+        <a href="/thematiques" class="see-all">Voir tout <Icon name="arrow" size={16} /></a>
+      </div>
+      <div class="cats-grid">
+        {catsToShow.map((c) => (
+          <a href={`/thematiques/${c.slug}`} class="cat-card">
+            <span class="cat-icon"><Icon name={c.icon} size={22} /></span>
+            <span class="cat-body">
+              <span class="cat-name">{c.name}</span>
+              <span class="cat-tag">{c.tagline}</span>
+            </span>
+            <span class="cat-count meta">{counts.get(c.slug) ?? 0}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {latest.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Fraîchement publié</p>
+            <h2 class="section-title">Les derniers articles</h2>
+          </div>
+          <a href="/blog" class="see-all">Tout voir <Icon name="arrow" size={16} /></a>
+        </div>
+        <div class="grid grid-3">
+          {latest.map((p) => (
+            <ArticleCard
+              title={p.data.title}
+              href={`/blog/${p.id}`}
+              description={p.data.description}
+              cover={p.data.cover}
+              coverAlt={p.data.coverAlt}
+              categorySlug={p.data.categorySlug}
+              date={p.data.pubDate}
+              readingTime={p.data.readingTime}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA band -->
+  <section class="cta-band">
+    <div class="container cta-inner">
+      <div class="cta-net grid-bg" aria-hidden="true"></div>
+      <h2 class="cta-title">Une question ? Le web a une réponse claire.</h2>
+      <p class="cta-sub">Des centaines de guides pratiques, vérifiés et pensés pour l'action.</p>
+      <a href="/recherche" class="btn btn-primary"><Icon name="search" size={18} /> Lancer une recherche</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* HERO */
+  .hero { position: relative; padding-block: clamp(56px, 10vw, 104px); border-bottom: 1px solid var(--border); overflow: hidden; }
+  .hero-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(46% 46% at 78% 8%, rgba(6,182,212,0.16), transparent 70%),
+      radial-gradient(50% 50% at 12% 4%, rgba(37,99,235,0.16), transparent 70%);
+  }
+  .hero-inner { position: relative; max-width: 880px; }
+  .hero-title { font-size: clamp(2.3rem, 6.2vw, 4.1rem); line-height: 1.05; margin: 18px 0 22px; letter-spacing: -0.03em; }
+  .grad { background: var(--gradient-brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero-sub { font-size: clamp(1.05rem, 2.4vw, 1.28rem); color: var(--slate-600); max-width: 62ch; line-height: 1.65; margin: 0 0 30px; }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .hero-stats { display: flex; gap: 40px; margin-top: 44px; flex-wrap: wrap; }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-num { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; color: var(--blue-700); letter-spacing: -0.03em; }
+  .stat-label { font-family: var(--font-mono); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--slate-500); }
+
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+  .section-title { font-size: clamp(1.6rem, 3.4vw, 2.2rem); margin: 6px 0 0; }
+  .see-all { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; font-size: 0.92rem; color: var(--blue-700); white-space: nowrap; }
+  .see-all:hover { gap: 11px; text-decoration: none; }
+
+  .feat-grid { grid-auto-rows: 1fr; }
+
+  /* Categories */
+  .cats-section { background: var(--slate-50); border-block: 1px solid var(--border); }
+  .cats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .cat-card {
+    display: flex; align-items: center; gap: 15px;
+    background: #fff; border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: 16px 18px; transition: all 0.18s ease;
+  }
+  .cat-card:hover { border-color: var(--blue-300); box-shadow: var(--shadow-md); transform: translateY(-2px); text-decoration: none; }
+  .cat-icon {
+    display: grid; place-items: center; flex: none;
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-100);
+  }
+  .cat-card:hover .cat-icon { background: var(--gradient-brand); color: #fff; border-color: transparent; }
+  .cat-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+  .cat-name { font-family: var(--font-display); font-weight: 600; color: var(--slate-900); font-size: 1rem; line-height: 1.2; }
+  .cat-tag { font-size: 0.82rem; color: var(--slate-500); line-height: 1.35; }
+  .cat-count { flex: none; font-weight: 600; color: var(--blue-500); }
+  @media (max-width: 860px) { .cats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .cats-grid { grid-template-columns: 1fr; } }
+
+  /* CTA band */
+  .cta-band { padding-block: 20px 70px; }
+  .cta-inner {
+    position: relative; overflow: hidden;
+    background: linear-gradient(125deg, var(--blue-700), var(--blue-600) 45%, var(--cyan-600));
+    border-radius: var(--r-xl); padding: clamp(40px, 6vw, 66px);
+    text-align: center; color: #fff;
+    box-shadow: var(--shadow-lg);
+  }
+  .cta-net { position: absolute; inset: 0; opacity: 0.18; --grid-line: rgba(255,255,255,0.5); }
+  .cta-title { position: relative; color: #fff; font-size: clamp(1.5rem, 3.6vw, 2.3rem); margin: 0 0 12px; }
+  .cta-sub { position: relative; color: rgba(255,255,255,0.86); margin: 0 0 26px; font-size: 1.08rem; }
+  .cta-band .btn-primary { position: relative; background: #fff; color: var(--blue-700); box-shadow: 0 12px 30px -10px rgba(0,0,0,0.35); }
+  .cta-band .btn-primary:hover { transform: translateY(-2px); }
+
+  @media (max-width: 640px) { .hero-stats { gap: 28px; } }
+</style>

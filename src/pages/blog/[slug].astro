@@ -1,0 +1,268 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { SITE } from '../../data/site';
+import { categoryFor } from '../../data/categories';
+import { formatDate, isoDate, readingTime as calcRT } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog')).filter((p) => !p.data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post, posts },
+  }));
+}
+
+const { post, posts } = Astro.props;
+const { Content, headings } = await render(post);
+const d = post.data;
+const cat = categoryFor(d.categorySlug);
+const rt = d.readingTime ?? calcRT(post.body ?? '');
+const url = new URL(`/blog/${post.id}`, SITE.url).href;
+
+const toc = headings.filter((h) => h.depth === 2);
+
+const related = posts
+  .filter((p) => p.id !== post.id && p.data.categorySlug === d.categorySlug)
+  .slice(0, 3);
+const fallback = posts.filter((p) => p.id !== post.id).slice(0, 3);
+const relatedPosts = related.length >= 2 ? related : fallback;
+
+const jsonld: Record<string, any>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: d.title,
+    description: d.description,
+    image: d.cover ? new URL(d.cover, SITE.url).href : undefined,
+    datePublished: isoDate(d.pubDate),
+    dateModified: isoDate(d.updatedDate ?? d.pubDate),
+    author: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE.name,
+      logo: { '@type': 'ImageObject', url: new URL('/favicon.svg', SITE.url).href },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    articleSection: cat.name,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE.url },
+      { '@type': 'ListItem', position: 2, name: cat.name, item: new URL(`/thematiques/${cat.slug}`, SITE.url).href },
+      { '@type': 'ListItem', position: 3, name: d.title, item: url },
+    ],
+  },
+];
+if (d.faq.length) {
+  jsonld.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: d.faq.map((f) => ({
+      '@type': 'Question',
+      name: f.question,
+      acceptedAnswer: { '@type': 'Answer', text: f.answer },
+    })),
+  });
+}
+---
+<BaseLayout
+  title={d.title}
+  description={d.description}
+  image={d.cover}
+  type="article"
+  jsonld={jsonld}
+>
+  <article class="post">
+    <div class="post-hero grid-bg">
+      <div class="container container-narrow post-hero-inner">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+          <a href="/">Accueil</a>
+          <Icon name="chevron" size={13} />
+          <a href={`/thematiques/${cat.slug}`}>{cat.name}</a>
+        </nav>
+        <a href={`/thematiques/${cat.slug}`} class="pill post-cat"><Icon name={cat.icon} size={13} /> {cat.name}</a>
+        <h1 class="post-title">{d.title}</h1>
+        <p class="post-lede">{d.description}</p>
+        <div class="post-meta">
+          <span class="meta"><Icon name="clock" size={14} /> {rt} min de lecture</span>
+          <span class="dot">•</span>
+          <time class="meta" datetime={isoDate(d.pubDate)}>{formatDate(d.pubDate)}</time>
+          {d.updatedDate && (
+            <>
+              <span class="dot">•</span>
+              <span class="meta">Mis à jour le {formatDate(d.updatedDate)}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+
+    {d.cover && (
+      <div class="container container-narrow">
+        <figure class="post-cover">
+          <img src={d.cover} alt={d.coverAlt ?? d.title} width="1200" height="675" fetchpriority="high" />
+        </figure>
+      </div>
+    )}
+
+    <div class="container post-grid">
+      <div class="post-main">
+        {d.takeaways.length > 0 && (
+          <aside class="takeaways" aria-label="L'essentiel">
+            <p class="takeaways-title"><Icon name="bolt" size={16} /> L'essentiel en {d.takeaways.length} points</p>
+            <ul>
+              {d.takeaways.map((t) => (
+                <li><Icon name="check" size={15} /><span>{t}</span></li>
+              ))}
+            </ul>
+          </aside>
+        )}
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        {d.faq.length > 0 && (
+          <section class="faq" aria-labelledby="faq-title">
+            <h2 id="faq-title" class="faq-heading">Questions fréquentes</h2>
+            <div class="faq-list">
+              {d.faq.map((f, i) => (
+                <details class="faq-item" open={i === 0}>
+                  <summary>
+                    <span>{f.question}</span>
+                    <Icon name="chevronDown" size={18} class="faq-chevron" />
+                  </summary>
+                  <div class="faq-answer"><p>{f.answer}</p></div>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {toc.length > 2 && (
+        <aside class="post-side">
+          <div class="toc">
+            <p class="toc-title">Sommaire</p>
+            <nav aria-label="Sommaire">
+              <ol>
+                {toc.map((h) => (
+                  <li><a href={`#${h.slug}`}>{h.text}</a></li>
+                ))}
+              </ol>
+            </nav>
+          </div>
+        </aside>
+      )}
+    </div>
+
+    {relatedPosts.length > 0 && (
+      <section class="section related">
+        <div class="container">
+          <p class="eyebrow">À lire aussi</p>
+          <h2 class="related-title">Dans la même veine</h2>
+          <div class="grid grid-3">
+            {relatedPosts.map((p) => (
+              <ArticleCard
+                title={p.data.title}
+                href={`/blog/${p.id}`}
+                description={p.data.description}
+                cover={p.data.cover}
+                coverAlt={p.data.coverAlt}
+                categorySlug={p.data.categorySlug}
+                date={p.data.pubDate}
+                readingTime={p.data.readingTime}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>
+
+<style>
+  .post-hero { border-bottom: 1px solid var(--border); padding-block: 40px 34px; background-color: var(--bg-soft); }
+  .post-hero-inner { text-align: left; }
+  .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--slate-500); margin-bottom: 18px; }
+  .breadcrumb a { color: var(--slate-500); font-weight: 500; }
+  .breadcrumb a:hover { color: var(--blue-700); }
+  .post-cat { margin-bottom: 16px; }
+  .post-title { font-size: clamp(1.9rem, 4.6vw, 3rem); line-height: 1.1; margin: 0 0 18px; max-width: 20ch; }
+  .post-lede { font-size: 1.2rem; color: var(--slate-600); line-height: 1.6; margin: 0 0 22px; max-width: 60ch; }
+  .post-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .post-meta .meta { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { color: var(--slate-300); }
+
+  .post-cover { margin: 30px 0 0; }
+  .post-cover img { width: 100%; border-radius: var(--r-lg); border: 1px solid var(--border); box-shadow: var(--shadow-md); aspect-ratio: 16/9; object-fit: cover; }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 56px;
+    align-items: start;
+    padding-top: 44px;
+  }
+  .post-main { max-width: 760px; width: 100%; margin-inline: auto; }
+
+  .takeaways {
+    background: linear-gradient(125deg, var(--blue-50), #ecfeff);
+    border: 1px solid var(--blue-100);
+    border-radius: var(--r-lg);
+    padding: 22px 24px;
+    margin-bottom: 36px;
+  }
+  .takeaways-title {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-display); font-weight: 600;
+    color: var(--blue-800); margin: 0 0 14px; font-size: 1.05rem;
+  }
+  .takeaways-title :global(svg) { color: var(--cyan-500); }
+  .takeaways ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+  .takeaways li { display: flex; gap: 11px; align-items: flex-start; color: var(--slate-700); }
+  .takeaways li :global(svg) { color: var(--blue-600); flex: none; margin-top: 4px; }
+
+  /* Sidebar TOC */
+  .post-side { position: sticky; top: 90px; }
+  .toc { border-left: 2px solid var(--border); padding-left: 18px; }
+  .toc-title {
+    font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--slate-500); margin: 0 0 12px;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; counter-reset: toc; }
+  .toc li { counter-increment: toc; }
+  .toc a { font-size: 0.86rem; color: var(--slate-600); line-height: 1.4; display: block; }
+  .toc a::before { content: counter(toc, decimal-leading-zero); font-family: var(--font-mono); color: var(--blue-400); margin-right: 8px; font-size: 0.75rem; }
+  .toc a:hover { color: var(--blue-700); }
+
+  /* FAQ */
+  .faq { margin-top: 52px; padding-top: 8px; }
+  .faq-heading { font-size: 1.6rem; margin-bottom: 20px; }
+  .faq-list { display: flex; flex-direction: column; gap: 12px; }
+  .faq-item { border: 1px solid var(--border); border-radius: var(--r-md); background: #fff; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+  .faq-item[open] { border-color: var(--blue-200); box-shadow: var(--shadow-sm); }
+  .faq-item summary {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 16px 20px; cursor: pointer; font-family: var(--font-display);
+    font-weight: 600; color: var(--slate-900); font-size: 1.03rem; list-style: none;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-chevron { color: var(--blue-500); transition: transform 0.2s ease; flex: none; }
+  .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+  .faq-answer { padding: 0 20px 18px; color: var(--slate-600); line-height: 1.7; }
+  .faq-answer p { margin: 0; }
+
+  .related { background: var(--slate-50); border-top: 1px solid var(--border); margin-top: 70px; }
+  .related-title { font-size: 1.7rem; margin: 6px 0 28px; }
+
+  @media (max-width: 1000px) {
+    .post-grid { grid-template-columns: 1fr; gap: 0; }
+    .post-side { display: none; }
+  }
+</style>

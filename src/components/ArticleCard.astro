@@ -1,0 +1,82 @@
+---
+import Icon from './Icon.astro';
+import { formatDate } from '../lib/utils';
+import { categoryFor } from '../data/categories';
+
+interface Props {
+  title: string;
+  href: string;
+  description?: string;
+  cover?: string;
+  coverAlt?: string;
+  categorySlug?: string;
+  category?: string;
+  date?: Date | string;
+  readingTime?: number;
+  featured?: boolean;
+  eager?: boolean;
+}
+const {
+  title, href, description, cover, coverAlt,
+  categorySlug, category, date, readingTime, featured = false, eager = false,
+} = Astro.props;
+const cat = categoryFor(categorySlug);
+const catName = category ?? cat.name;
+---
+<article class:list={['card article-card', { featured }]}>
+  <a href={href} class="card-media" tabindex="-1" aria-hidden="true">
+    {cover ? (
+      <img src={cover} alt={coverAlt ?? ''} loading={eager ? 'eager' : 'lazy'} decoding="async" width="800" height="533" />
+    ) : (
+      <span class="card-media-fallback grid-bg"></span>
+    )}
+    <span class="card-cat pill">{catName}</span>
+  </a>
+  <div class="card-body">
+    <h3 class="card-title"><a href={href}>{title}</a></h3>
+    {description && <p class="card-desc">{description}</p>}
+    <div class="card-meta">
+      {date && <span class="meta">{formatDate(date)}</span>}
+      {readingTime && (
+        <span class="meta meta-rt"><Icon name="clock" size={13} /> {readingTime} min</span>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .article-card { }
+  .card-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: var(--blue-50);
+  }
+  .card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+  .card:hover .card-media img { transform: scale(1.05); }
+  .card-media-fallback { display: block; width: 100%; height: 100%; background-color: var(--blue-50); }
+  .card-cat {
+    position: absolute;
+    left: 12px; top: 12px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(6px);
+    border-color: rgba(255,255,255,0.6);
+    color: var(--blue-700);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .card-title { font-size: 1.12rem; line-height: 1.32; margin: 0; letter-spacing: -0.02em; }
+  .card-title a { color: var(--slate-900); }
+  .card-title a:hover { color: var(--blue-700); text-decoration: none; }
+  .card-desc { color: var(--slate-500); font-size: 0.92rem; line-height: 1.55; margin: 0; }
+  .card-meta { margin-top: auto; padding-top: 6px; display: flex; align-items: center; gap: 14px; }
+  .meta-rt { display: inline-flex; align-items: center; gap: 5px; }
+
+  .featured { grid-column: span 2; }
+  .featured .card-media { aspect-ratio: 16 / 8; }
+  .featured .card-title { font-size: 1.5rem; }
+  .featured .card-desc { font-size: 1rem; }
+  @media (max-width: 920px) { .featured { grid-column: span 2; } }
+  @media (max-width: 620px) { .featured { grid-column: span 1; } .featured .card-media { aspect-ratio: 3/2; } }
+</style>

@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { CATEGORIES } from '../../data/categories';
+
+const all = (await getCollection('blog')).filter((p) => !p.data.draft);
+const counts = new Map<string, number>();
+for (const p of all) counts.set(p.data.categorySlug, (counts.get(p.data.categorySlug) ?? 0) + 1);
+---
+<BaseLayout
+  title="Thématiques"
+  description="Explorez web-audience par thématique : tech & web, finance, maison, cuisine, santé, voyage, auto, sport, famille, mode, nature et développement personnel."
+>
+  <section class="th-hero grid-bg">
+    <div class="container">
+      <p class="eyebrow">Explorer</p>
+      <h1 class="th-title">Toutes les thématiques</h1>
+      <p class="th-sub">Douze univers pour comprendre le web et le monde qui vous entoure. Choisissez le vôtre.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="th-grid">
+        {CATEGORIES.map((c) => (
+          <a href={`/thematiques/${c.slug}`} class="th-card">
+            <div class="th-card-top">
+              <span class="th-icon"><Icon name={c.icon} size={26} /></span>
+              <span class="th-num meta">{counts.get(c.slug) ?? 0} articles</span>
+            </div>
+            <h2 class="th-name">{c.name}</h2>
+            <p class="th-tag">{c.tagline}</p>
+            <span class="th-link">Découvrir <Icon name="arrow" size={16} /></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .th-hero { border-bottom: 1px solid var(--border); background-color: var(--bg-soft); padding-block: 46px 34px; }
+  .th-title { font-size: clamp(2rem, 5vw, 3rem); margin: 14px 0 10px; }
+  .th-sub { color: var(--slate-600); font-size: 1.1rem; max-width: 60ch; margin: 0; }
+  .th-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .th-card {
+    display: flex; flex-direction: column; gap: 10px;
+    background: #fff; border: 1px solid var(--border); border-radius: var(--r-lg);
+    padding: 24px; transition: all 0.2s ease; position: relative; overflow: hidden;
+  }
+  .th-card::after {
+    content: ''; position: absolute; inset: auto -30% -60% auto; width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(37,99,235,0.10), transparent 70%); opacity: 0; transition: opacity 0.25s;
+  }
+  .th-card:hover { border-color: var(--blue-300); box-shadow: var(--shadow-lg); transform: translateY(-3px); text-decoration: none; }
+  .th-card:hover::after { opacity: 1; }
+  .th-card-top { display: flex; align-items: center; justify-content: space-between; }
+  .th-icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px; background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-100); }
+  .th-card:hover .th-icon { background: var(--gradient-brand); color: #fff; border-color: transparent; }
+  .th-name { font-size: 1.22rem; margin: 4px 0 0; }
+  .th-tag { color: var(--slate-500); font-size: 0.94rem; margin: 0; flex: 1; }
+  .th-link { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--blue-700); font-size: 0.9rem; margin-top: 6px; }
+  .th-card:hover .th-link { gap: 11px; }
+  @media (max-width: 860px) { .th-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .th-grid { grid-template-columns: 1fr; } }
+</style>
