@@ -10,8 +10,11 @@ export default defineConfig({
   site: 'https://www.web-audience.net',
   trailingSlash: 'ignore',
   build: {
-    // Emit /{slug}.html to preserve the source site's existing URLs (SEO).
-    format: 'file',
+    // Directory format: article pages are emitted as /{slug}.html/index.html
+    // (the route param carries the ".html"). Cloudflare Pages then serves
+    // /{slug}.html with a 200 — preserving the source site's exact URLs —
+    // instead of 308-redirecting a real .html file to its extensionless form.
+    format: 'directory',
   },
   markdown: {
     remarkPlugins: [remarkDirective, remarkCallouts],
@@ -26,19 +29,12 @@ export default defineConfig({
     sitemap({
       filter: (page) => !page.includes('/404') && !page.includes('/recherche'),
       serialize(item) {
-        // Articles are served at /{slug}.html — make the sitemap match the
-        // canonical URLs. Section pages (/, /blog, /thematiques…) stay clean.
+        // Normalise trailing slashes so sitemap URLs match the canonicals:
+        // articles => /{slug}.html, sections => /blog, /thematiques/x, etc.
         const url = new URL(item.url);
-        const path = url.pathname.replace(/\/$/, '');
-        const isSection =
-          path === '' ||
-          path === '/blog' ||
-          path === '/a-propos' ||
-          path.startsWith('/thematiques') ||
-          path.startsWith('/blog/');
-        if (!isSection && /^\/[a-z0-9-]+$/i.test(path)) {
-          item.url = url.origin + path + '.html';
-        }
+        let path = url.pathname;
+        if (path !== '/') path = path.replace(/\/$/, '');
+        item.url = url.origin + path;
         return item;
       },
     }),

@@ -14,7 +14,9 @@ export async function getStaticPaths() {
     (p) => !p.data.draft && !RESERVED.has(p.id),
   );
   return posts.map((post) => ({
-    params: { slug: post.id },
+    // The ".html" is part of the path segment so the output is
+    // /{slug}.html/index.html — served at /{slug}.html (200) on Cloudflare.
+    params: { slug: `${post.id}.html` },
     props: { post, posts },
   }));
 }
