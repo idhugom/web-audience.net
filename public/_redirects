@@ -1,0 +1,4 @@
+# Serve /{slug}.html (no trailing slash) directly with 200, bypassing
+# Cloudflare Pages' automatic trailing-slash redirect. The article content is
+# emitted at /{slug}.html/index.html, so we rewrite the bare .html path to it.
+/*.html  /:splat.html/index.html  200
