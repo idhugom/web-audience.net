@@ -73,7 +73,7 @@ const jsonld = {
             featured
             eager
             title={featured.data.title}
-            href={`/blog/${featured.id}`}
+            href={`/${featured.id}.html`}
             description={featured.data.description}
             cover={featured.data.cover}
             coverAlt={featured.data.coverAlt}
@@ -84,7 +84,7 @@ const jsonld = {
           {secondary.map((p) => (
             <ArticleCard
               title={p.data.title}
-              href={`/blog/${p.id}`}
+              href={`/${p.id}.html`}
               description={p.data.description}
               cover={p.data.cover}
               coverAlt={p.data.coverAlt}
@@ -137,7 +137,7 @@ const jsonld = {
           {latest.map((p) => (
             <ArticleCard
               title={p.data.title}
-              href={`/blog/${p.id}`}
+              href={`/${p.id}.html`}
               description={p.data.description}
               cover={p.data.cover}
               coverAlt={p.data.coverAlt}

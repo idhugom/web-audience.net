@@ -10,7 +10,8 @@ export default defineConfig({
   site: 'https://www.web-audience.net',
   trailingSlash: 'ignore',
   build: {
-    format: 'directory',
+    // Emit /{slug}.html to preserve the source site's existing URLs (SEO).
+    format: 'file',
   },
   markdown: {
     remarkPlugins: [remarkDirective, remarkCallouts],

@@ -67,6 +67,7 @@ async function tryDownload(url) {
         },
       });
       const ct = res.headers.get('content-type') || '';
+      if (res.status === 404 || res.status === 410) return null; // file genuinely gone
       if (res.status >= 300 && res.status < 400) {
         // Redirect usually means the file was deleted; retry once in case a
         // transient/load-induced redirect masks an existing file.

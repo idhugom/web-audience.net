@@ -1,14 +1,19 @@
 ---
 import { getCollection, render } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Icon from '../../components/Icon.astro';
-import ArticleCard from '../../components/ArticleCard.astro';
-import { SITE } from '../../data/site';
-import { categoryFor } from '../../data/categories';
-import { formatDate, isoDate, readingTime as calcRT } from '../../lib/utils';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { SITE } from '../data/site';
+import { categoryFor } from '../data/categories';
+import { formatDate, isoDate, readingTime as calcRT } from '../lib/utils';
+
+// Reserved top-level paths that must not be captured by the article route.
+const RESERVED = new Set(['blog', 'thematiques', 'a-propos', 'recherche', '404', 'index', 'rss.xml', 'sitemap-index']);
 
 export async function getStaticPaths() {
-  const posts = (await getCollection('blog')).filter((p) => !p.data.draft);
+  const posts = (await getCollection('blog')).filter(
+    (p) => !p.data.draft && !RESERVED.has(p.id),
+  );
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post, posts },
@@ -20,7 +25,7 @@ const { Content, headings } = await render(post);
 const d = post.data;
 const cat = categoryFor(d.categorySlug);
 const rt = d.readingTime ?? calcRT(post.body ?? '');
-const url = new URL(`/blog/${post.id}`, SITE.url).href;
+const url = new URL(`/${post.id}.html`, SITE.url).href;
 
 const toc = headings.filter((h) => h.depth === 2);
 
@@ -75,6 +80,7 @@ if (d.faq.length) {
   description={d.description}
   image={d.cover}
   type="article"
+  canonical={url}
   jsonld={jsonld}
 >
   <article class="post">
@@ -170,7 +176,7 @@ if (d.faq.length) {
             {relatedPosts.map((p) => (
               <ArticleCard
                 title={p.data.title}
-                href={`/blog/${p.id}`}
+                href={`/${p.id}.html`}
                 description={p.data.description}
                 cover={p.data.cover}
                 coverAlt={p.data.coverAlt}
@@ -228,7 +234,6 @@ if (d.faq.length) {
   .takeaways li { display: flex; gap: 11px; align-items: flex-start; color: var(--slate-700); }
   .takeaways li :global(svg) { color: var(--blue-600); flex: none; margin-top: 4px; }
 
-  /* Sidebar TOC */
   .post-side { position: sticky; top: 90px; }
   .toc { border-left: 2px solid var(--border); padding-left: 18px; }
   .toc-title {
@@ -241,7 +246,6 @@ if (d.faq.length) {
   .toc a::before { content: counter(toc, decimal-leading-zero); font-family: var(--font-mono); color: var(--blue-400); margin-right: 8px; font-size: 0.75rem; }
   .toc a:hover { color: var(--blue-700); }
 
-  /* FAQ */
   .faq { margin-top: 52px; padding-top: 8px; }
   .faq-heading { font-size: 1.6rem; margin-bottom: 20px; }
   .faq-list { display: flex; flex-direction: column; gap: 12px; }
