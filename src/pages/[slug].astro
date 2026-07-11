@@ -7,10 +7,9 @@ import { SITE } from '../data/site';
 import { categoryFor } from '../data/categories';
 import { formatDate, isoDate, readingTime as calcRT } from '../lib/utils';
 
-// Reserved top-level paths that must not be captured by the article route.
-const RESERVED = new Set(['blog', 'thematiques', 'a-propos', 'recherche', '404', 'index', 'rss.xml', 'sitemap-index']);
-
 export async function getStaticPaths() {
+  // Reserved top-level paths that must not be captured by the article route.
+  const RESERVED = new Set(['blog', 'thematiques', 'a-propos', 'recherche', '404', 'index', 'rss.xml', 'sitemap-index']);
   const posts = (await getCollection('blog')).filter(
     (p) => !p.data.draft && !RESERVED.has(p.id),
   );
