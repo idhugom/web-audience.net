@@ -10,9 +10,9 @@ export const SITE = {
   email: 'contact@web-audience.net',
   nav: [
     { label: 'Accueil', href: '/' },
-    { label: 'Articles', href: '/blog' },
-    { label: 'Thématiques', href: '/thematiques' },
-    { label: 'À propos', href: '/a-propos' },
+    { label: 'Articles', href: '/blog/' },
+    { label: 'Thématiques', href: '/thematiques/' },
+    { label: 'À propos', href: '/a-propos/' },
   ],
 } as const;
 

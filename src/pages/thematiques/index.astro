@@ -23,7 +23,7 @@ for (const p of all) counts.set(p.data.categorySlug, (counts.get(p.data.category
     <div class="container">
       <div class="th-grid">
         {CATEGORIES.map((c) => (
-          <a href={`/thematiques/${c.slug}`} class="th-card">
+          <a href={`/thematiques/${c.slug}/`} class="th-card">
             <div class="th-card-top">
               <span class="th-icon"><Icon name={c.icon} size={26} /></span>
               <span class="th-num meta">{counts.get(c.slug) ?? 0} articles</span>

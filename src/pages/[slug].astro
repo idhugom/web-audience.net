@@ -26,7 +26,7 @@ const { Content, headings } = await render(post);
 const d = post.data;
 const cat = categoryFor(d.categorySlug);
 const rt = d.readingTime ?? calcRT(post.body ?? '');
-const url = new URL(`/${post.id}.html`, SITE.url).href;
+const url = new URL(`/${post.id}.html/`, SITE.url).href;
 
 const toc = headings.filter((h) => h.depth === 2);
 
@@ -59,7 +59,7 @@ const jsonld: Record<string, any>[] = [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Accueil', item: SITE.url },
-      { '@type': 'ListItem', position: 2, name: cat.name, item: new URL(`/thematiques/${cat.slug}`, SITE.url).href },
+      { '@type': 'ListItem', position: 2, name: cat.name, item: new URL(`/thematiques/${cat.slug}/`, SITE.url).href },
       { '@type': 'ListItem', position: 3, name: d.title, item: url },
     ],
   },
@@ -90,9 +90,9 @@ if (d.faq.length) {
         <nav class="breadcrumb" aria-label="Fil d'Ariane">
           <a href="/">Accueil</a>
           <Icon name="chevron" size={13} />
-          <a href={`/thematiques/${cat.slug}`}>{cat.name}</a>
+          <a href={`/thematiques/${cat.slug}/`}>{cat.name}</a>
         </nav>
-        <a href={`/thematiques/${cat.slug}`} class="pill post-cat"><Icon name={cat.icon} size={13} /> {cat.name}</a>
+        <a href={`/thematiques/${cat.slug}/`} class="pill post-cat"><Icon name={cat.icon} size={13} /> {cat.name}</a>
         <h1 class="post-title">{d.title}</h1>
         <p class="post-lede">{d.description}</p>
         <div class="post-meta">
@@ -177,7 +177,7 @@ if (d.faq.length) {
             {relatedPosts.map((p) => (
               <ArticleCard
                 title={p.data.title}
-                href={`/${p.id}.html`}
+                href={`/${p.id}.html/`}
                 description={p.data.description}
                 cover={p.data.cover}
                 coverAlt={p.data.coverAlt}

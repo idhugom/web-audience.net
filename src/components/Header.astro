@@ -17,7 +17,7 @@ const path = Astro.url.pathname;
       ))}
     </nav>
     <div class="header-actions">
-      <a href="/recherche" class="icon-btn" aria-label="Rechercher">
+      <a href="/recherche/" class="icon-btn" aria-label="Rechercher">
         <Icon name="search" size={20} />
       </a>
       <button class="icon-btn menu-toggle" aria-label="Menu" aria-expanded="false" data-menu-toggle>
@@ -28,7 +28,7 @@ const path = Astro.url.pathname;
   <div class="mobile-menu" data-mobile-menu hidden>
     <nav aria-label="Navigation mobile">
       {nav.map((item) => <a href={item.href} class="mobile-link">{item.label}</a>)}
-      <a href="/recherche" class="mobile-link">Recherche</a>
+      <a href="/recherche/" class="mobile-link">Recherche</a>
     </nav>
   </div>
 </header>

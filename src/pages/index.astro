@@ -29,7 +29,7 @@ const jsonld = {
   inLanguage: 'fr-FR',
   potentialAction: {
     '@type': 'SearchAction',
-    target: `${SITE.url}/recherche?q={search_term_string}`,
+    target: `${SITE.url}/recherche/?q={search_term_string}`,
     'query-input': 'required name=search_term_string',
   },
 };
@@ -50,8 +50,8 @@ const jsonld = {
         sur tous les sujets qui font votre quotidien en ligne.
       </p>
       <div class="hero-actions">
-        <a href="/blog" class="btn btn-primary">Explorer les articles <Icon name="arrow" size={18} /></a>
-        <a href="/thematiques" class="btn btn-ghost">Parcourir les thématiques</a>
+        <a href="/blog/" class="btn btn-primary">Explorer les articles <Icon name="arrow" size={18} /></a>
+        <a href="/thematiques/" class="btn btn-ghost">Parcourir les thématiques</a>
       </div>
       <div class="hero-stats">
         <div class="stat"><span class="stat-num">{all.length}+</span><span class="stat-label">articles</span></div>
@@ -66,14 +66,14 @@ const jsonld = {
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">À la une</p>
-          <a href="/blog" class="see-all">Tous les articles <Icon name="arrow" size={16} /></a>
+          <a href="/blog/" class="see-all">Tous les articles <Icon name="arrow" size={16} /></a>
         </div>
         <div class="grid grid-3 feat-grid">
           <ArticleCard
             featured
             eager
             title={featured.data.title}
-            href={`/${featured.id}.html`}
+            href={`/${featured.id}.html/`}
             description={featured.data.description}
             cover={featured.data.cover}
             coverAlt={featured.data.coverAlt}
@@ -84,7 +84,7 @@ const jsonld = {
           {secondary.map((p) => (
             <ArticleCard
               title={p.data.title}
-              href={`/${p.id}.html`}
+              href={`/${p.id}.html/`}
               description={p.data.description}
               cover={p.data.cover}
               coverAlt={p.data.coverAlt}
@@ -106,11 +106,11 @@ const jsonld = {
           <p class="eyebrow">Explorer par thème</p>
           <h2 class="section-title">Toutes les thématiques</h2>
         </div>
-        <a href="/thematiques" class="see-all">Voir tout <Icon name="arrow" size={16} /></a>
+        <a href="/thematiques/" class="see-all">Voir tout <Icon name="arrow" size={16} /></a>
       </div>
       <div class="cats-grid">
         {catsToShow.map((c) => (
-          <a href={`/thematiques/${c.slug}`} class="cat-card">
+          <a href={`/thematiques/${c.slug}/`} class="cat-card">
             <span class="cat-icon"><Icon name={c.icon} size={22} /></span>
             <span class="cat-body">
               <span class="cat-name">{c.name}</span>
@@ -131,13 +131,13 @@ const jsonld = {
             <p class="eyebrow">Fraîchement publié</p>
             <h2 class="section-title">Les derniers articles</h2>
           </div>
-          <a href="/blog" class="see-all">Tout voir <Icon name="arrow" size={16} /></a>
+          <a href="/blog/" class="see-all">Tout voir <Icon name="arrow" size={16} /></a>
         </div>
         <div class="grid grid-3">
           {latest.map((p) => (
             <ArticleCard
               title={p.data.title}
-              href={`/${p.id}.html`}
+              href={`/${p.id}.html/`}
               description={p.data.description}
               cover={p.data.cover}
               coverAlt={p.data.coverAlt}
@@ -157,7 +157,7 @@ const jsonld = {
       <div class="cta-net grid-bg" aria-hidden="true"></div>
       <h2 class="cta-title">Une question ? Le web a une réponse claire.</h2>
       <p class="cta-sub">Des centaines de guides pratiques, vérifiés et pensés pour l'action.</p>
-      <a href="/recherche" class="btn btn-primary"><Icon name="search" size={18} /> Lancer une recherche</a>
+      <a href="/recherche/" class="btn btn-primary"><Icon name="search" size={18} /> Lancer une recherche</a>
     </div>
   </section>
 </BaseLayout>

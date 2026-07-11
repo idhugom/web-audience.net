@@ -20,16 +20,16 @@ const cols = CATEGORIES.slice(0, 8);
     <div class="footer-col">
       <h3 class="footer-title">Thématiques</h3>
       <ul>
-        {cols.map((c) => <li><a href={`/thematiques/${c.slug}`}>{c.name}</a></li>)}
+        {cols.map((c) => <li><a href={`/thematiques/${c.slug}/`}>{c.name}</a></li>)}
       </ul>
     </div>
     <div class="footer-col">
       <h3 class="footer-title">Explorer</h3>
       <ul>
-        <li><a href="/blog">Tous les articles</a></li>
-        <li><a href="/thematiques">Toutes les thématiques</a></li>
-        <li><a href="/recherche">Recherche</a></li>
-        <li><a href="/a-propos">À propos</a></li>
+        <li><a href="/blog/">Tous les articles</a></li>
+        <li><a href="/thematiques/">Toutes les thématiques</a></li>
+        <li><a href="/recherche/">Recherche</a></li>
+        <li><a href="/a-propos/">À propos</a></li>
       </ul>
     </div>
   </div>

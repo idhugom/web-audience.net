@@ -13,8 +13,8 @@ for (let i = 1; i <= last; i++) {
   if (i === 1 || i === last || Math.abs(i - cur) <= 1) nums.push(i);
   else if (nums[nums.length - 1] !== '…') nums.push('…');
 }
-const base = page.url.first?.replace(/\/1?$/, '') || '/blog';
-const hrefFor = (n: number) => (n === 1 ? base : `${base}/${n}`);
+const base = (page.url.first || '/blog/').replace(/\/+$/, ''); // e.g. "/blog"
+const hrefFor = (n: number) => (n === 1 ? `${base}/` : `${base}/${n}/`);
 ---
 {last > 1 && (
   <nav class="pagination" aria-label="Pagination">

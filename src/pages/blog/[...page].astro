@@ -26,9 +26,9 @@ const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
       <h1 class="listing-title">Tous les articles</h1>
       <p class="listing-sub">Des guides complets et vérifiés, classés par thématique. Page {page.currentPage} sur {page.lastPage}.</p>
       <div class="chip-row">
-        <a href="/blog" class="chip is-active">Tout</a>
+        <a href="/blog/" class="chip is-active">Tout</a>
         {CATEGORIES.map((c) => (
-          <a href={`/thematiques/${c.slug}`} class="chip"><Icon name={c.icon} size={14} /> {c.name}</a>
+          <a href={`/thematiques/${c.slug}/`} class="chip"><Icon name={c.icon} size={14} /> {c.name}</a>
         ))}
       </div>
     </div>
@@ -41,7 +41,7 @@ const { page } = Astro.props as { page: Page<CollectionEntry<'blog'>> };
           <ArticleCard
             eager={i < 3}
             title={p.data.title}
-            href={`/${p.id}.html`}
+            href={`/${p.id}.html/`}
             description={p.data.description}
             cover={p.data.cover}
             coverAlt={p.data.coverAlt}

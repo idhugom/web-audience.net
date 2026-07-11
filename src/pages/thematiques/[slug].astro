@@ -23,7 +23,7 @@ const jsonld = {
   '@type': 'CollectionPage',
   name: `${category.name} — ${SITE.name}`,
   description: category.tagline,
-  url: new URL(`/thematiques/${category.slug}`, SITE.url).href,
+  url: new URL(`/thematiques/${category.slug}/`, SITE.url).href,
 };
 ---
 <BaseLayout
@@ -35,7 +35,7 @@ const jsonld = {
     <div class="container">
       <nav class="breadcrumb" aria-label="Fil d'Ariane">
         <a href="/">Accueil</a><Icon name="chevron" size={12} />
-        <a href="/thematiques">Thématiques</a>
+        <a href="/thematiques/">Thématiques</a>
       </nav>
       <div class="cat-hero-inner">
         <span class="cat-hero-icon"><Icon name={cat.icon} size={30} /></span>
@@ -56,7 +56,7 @@ const jsonld = {
             <ArticleCard
               eager={i < 3}
               title={p.data.title}
-              href={`/${p.id}.html`}
+              href={`/${p.id}.html/`}
               description={p.data.description}
               cover={p.data.cover}
               coverAlt={p.data.coverAlt}
@@ -69,7 +69,7 @@ const jsonld = {
       ) : (
         <div class="empty">
           <p>Les articles de cette thématique arrivent très bientôt.</p>
-          <a href="/blog" class="btn btn-ghost">Voir tous les articles</a>
+          <a href="/blog/" class="btn btn-ghost">Voir tous les articles</a>
         </div>
       )}
     </div>
@@ -80,7 +80,7 @@ const jsonld = {
       <p class="eyebrow">Continuer l'exploration</p>
       <div class="chip-row">
         {CATEGORIES.filter((c) => c.slug !== category.slug).map((c) => (
-          <a href={`/thematiques/${c.slug}`} class="chip"><Icon name={c.icon} size={14} /> {c.name}</a>
+          <a href={`/thematiques/${c.slug}/`} class="chip"><Icon name={c.icon} size={14} /> {c.name}</a>
         ))}
       </div>
     </div>
