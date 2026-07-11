@@ -55,7 +55,8 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function tryDownload(url) {
   // Existing files serve a 200 image; missing/deleted files 301 to the homepage.
   // Returns a valid image Buffer, or null when the source has no real image.
-  for (let attempt = 0; attempt < 3; attempt++) {
+  let redirects = 0;
+  for (let attempt = 0; attempt < 4; attempt++) {
     try {
       const res = await fetch(url, {
         redirect: 'manual',
@@ -66,7 +67,13 @@ async function tryDownload(url) {
         },
       });
       const ct = res.headers.get('content-type') || '';
-      if (res.status >= 300 && res.status < 400) return null; // redirect => missing file
+      if (res.status >= 300 && res.status < 400) {
+        // Redirect usually means the file was deleted; retry once in case a
+        // transient/load-induced redirect masks an existing file.
+        if (++redirects >= 2) return null;
+        await sleep(800);
+        continue;
+      }
       if (!res.ok || !ct.startsWith('image/')) {
         await sleep(600 * (attempt + 1));
         continue;
