@@ -1,3 +1,0 @@
-# Redirige le domaine sans www (apex) vers www — 301 permanent, chemin préservé.
-https://web-audience.net/* https://www.web-audience.net/:splat 301
-http://web-audience.net/* https://www.web-audience.net/:splat 301
